@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,7 +20,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSwatch(
                     primarySwatch: Colors.blue, brightness: Brightness.light)
                 .copyWith(secondary: Colors.orange)),
-        home: Home());
+        home: const Home());
   }
 }
 
@@ -33,7 +32,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List todos = [];
+
   String todoTitle = "";
 
   createTodo() {
@@ -79,9 +78,6 @@ class _HomeState extends State<Home> {
                       TextButton(
                         child: const Text("Add"),
                         onPressed: () {
-                          // setState(() {
-                          //   todos.add(input);
-                          // });
                           createTodo();
                           Navigator.pop(context);
                         },
@@ -93,33 +89,37 @@ class _HomeState extends State<Home> {
         ),
         body: StreamBuilder(
           stream: FirebaseFirestore.instance.collection("MyTodos").snapshots(),
-          builder: (context, snapshot) {
-            return ListView.builder(
-                shrinkWrap: true,
-                itemCount: snapshot.data?.docs.length,
-                itemBuilder: (context, index) {
-                  DocumentSnapshot documentSnapshot = snapshot.data!.docs[index];
-                  return Dismissible(
-                    onDismissed: (direction){
-                      deleteTodo("todoTitle");
-                    },
-                      key: Key(documentSnapshot["todoTitle"]),
-                      child: Card(
-                        margin: const EdgeInsets.all(8),
-                        elevation: 4.0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0)),
-                        child: ListTile(
-                          title: Text(documentSnapshot['todoTitle']),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              deleteTodo(documentSnapshot["todoTitle"]);
-                            },
-                          ),
-                        ),
-                      ));
-                });
+          builder: (context,  snapshot) {
+           if(snapshot.hasData){
+             return ListView.builder(
+                 shrinkWrap: true,
+                 itemCount: snapshot.data!.docs.length,
+                 itemBuilder: (context, index) {
+                   DocumentSnapshot documentSnapshot = snapshot.data!.docs[index];
+                   return Dismissible(
+                       onDismissed: (direction){
+                         deleteTodo(documentSnapshot["todoTitle"]);
+                       },
+                       key: Key(documentSnapshot["todoTitle"]),
+                       child: Card(
+                         margin: const EdgeInsets.all(8),
+                         elevation: 4.0,
+                         shape: RoundedRectangleBorder(
+                             borderRadius: BorderRadius.circular(8.0)),
+                         child: ListTile(
+                           title: Text(documentSnapshot['todoTitle']),
+                           trailing: IconButton(
+                             icon: const Icon(Icons.delete, color: Colors.red),
+                             onPressed: () {
+                               deleteTodo(documentSnapshot["todoTitle"]);
+                             },
+                           ),
+                         ),
+                       ));
+                 });
+           }else {
+             return const CircularProgressIndicator();
+           }
           },
         ));
   }
