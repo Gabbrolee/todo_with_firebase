@@ -35,9 +35,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   DataBase dataBase = DataBase();
 
-  allTodos() {
-    var todos = FirebaseFirestore.instance.collection("MyTodos").snapshots();
-  }
 
   @override
   Widget build(BuildContext context) {
